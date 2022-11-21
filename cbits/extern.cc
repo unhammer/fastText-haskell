@@ -81,4 +81,11 @@ int64_t vector_argmax(fasttext::Vector* self) {
 
 /* TODO: vector constructor + printer, so we can fasttext.getWordVector */
 
+fasttext::Vector* get_word_vector(fasttext::FastText* fasttext, char* word) {
+    std::string s(word);
+    fasttext::Vector* vec = new fasttext::Vector(fasttext->getDimension());
+    fasttext->getWordVector(*vec, word);
+    return vec;
+}
+
 }

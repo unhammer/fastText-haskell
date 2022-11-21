@@ -17,7 +17,7 @@ If you did preprocessing on text when training the model, remember to
 preprocess your input in the same way.
 -}
 
-module Data.FastText (Prediction(..), getDimension, Model, loadModel, predictProbs) where
+module Data.FastText (Prediction(..), getWordVector, wordVectorData, getDimension, Model, Vector, loadModel, predictProbs) where
 
 import qualified Data.ByteString as S
 import System.IO.Unsafe
@@ -28,7 +28,7 @@ import Control.Exception(mask_)
 -- import Foreign.Utilities
 
 import qualified Data.FastText.Internal as FFI
-import Data.FastText.Internal (Model, getDimension, Prediction)
+import Data.FastText.Internal (Model, Vector, getDimension, Prediction)
 
 -- | Load a fasttext model from file.
 loadModel :: FilePath -> IO (Ptr Model)
@@ -46,3 +46,12 @@ predictProbs model k threshold input = S.useAsCStringLen input $ \(cinput, clen)
       actuallyPredicted <- FFI.predictProbs model k threshold preds cinput clen
       res <- peekArray k preds
       pure $ take actuallyPredicted res
+
+getWordVector :: Ptr Model -> S.ByteString -> IO (Ptr Vector)
+getWordVector model word = S.useAsCString word $ \cword -> FFI.getWordVector model cword
+
+-- TODO:
+-- https://hackage.haskell.org/package/storablevector-0.2.13.1/docs/Data-StorableVector.html#v:peek
+wordVectorData :: Ptr Vector -> IO [CFloat]
+wordVectorData v = peekArray (fromIntegral $ FFI.vector_size v) (FFI.vector_data v)
+

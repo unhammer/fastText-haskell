@@ -57,3 +57,24 @@ foreign import ccall unsafe "predict_probs" predictProbs :: Ptr Model -> Int -> 
 
 -- | Get the dimensions of a loaded fastText model.
 foreign import ccall unsafe "get_dimension" getDimension :: Ptr Model -> Int
+
+
+-- vector.h
+data Vector
+data Matrix
+foreign import ccall unsafe "vector_data" vector_data :: Ptr Vector -> Ptr FTReal
+foreign import ccall unsafe "vector_at" vector_at :: Ptr Vector -> Int64 -> FTReal
+foreign import ccall unsafe "vector_size" vector_size :: Ptr Vector -> Int64
+foreign import ccall unsafe "vector_zero" vector_zero :: Ptr Vector -> IO ()
+foreign import ccall unsafe "vector_scale" vector_scale :: Ptr Vector -> FTReal -> IO ()
+foreign import ccall unsafe "vector_norm" vector_norm :: Ptr Vector -> FTReal
+foreign import ccall unsafe "vector_addVector" vector_addVector :: Ptr Vector -> Ptr Vector -> IO ()
+foreign import ccall unsafe "vector_addVectorScaled" vector_addVectorScaled :: Ptr Vector -> Ptr Vector -> FTReal -> IO ()
+foreign import ccall unsafe "vector_addRow" vector_addRow :: Ptr Vector -> Ptr Matrix -> Int64 -> IO ()
+foreign import ccall unsafe "vector_addRowScaled" vector_addRowScaled :: Ptr Vector -> Ptr Matrix -> Int64 -> FTReal -> IO ()
+foreign import ccall unsafe "vector_mul" vector_mul :: Ptr Vector -> Ptr Matrix -> Ptr Vector -> IO ()
+foreign import ccall unsafe "vector_argmax" vector_argmax :: Ptr Vector -> IO Int64
+
+
+-- | Get a word vector
+foreign import ccall unsafe "get_word_vector" getWordVector :: Ptr Model -> CString -> IO (Ptr Vector)
