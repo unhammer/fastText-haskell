@@ -33,9 +33,9 @@ instance Storable Prediction where
   sizeOf _    = #size struct prediction
   peek ptr    = do
       sc <- (#peek struct prediction, score) ptr
-      len <- (#peek struct prediction, label_size) ptr
+      len <- (#peek struct prediction, label_size) ptr :: IO Word32
       str <- (#peek struct prediction, label) ptr
-      lb <- S.packCStringLen (str, len)
+      lb <- S.packCStringLen (str, fromIntegral len)
       pure (Prediction sc lb)
   poke ptr (Prediction sc lb@(PS fp 0 len)) = do
     buf <- mallocBytes (len+1)   -- based off useAsCStringLen

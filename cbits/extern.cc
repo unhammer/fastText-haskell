@@ -30,7 +30,7 @@ size_t predict_probs(fasttext::FastText* fasttext, int32_t k, fasttext::real thr
   for(size_t i = 0; i < ftPredictions.size(); i++) {
       prediction p;
       p.score = ftPredictions[i].first;
-      p.label_size = ftPredictions[i].second.size();
+      p.label_size = (uint32_t)ftPredictions[i].second.size();
       p.label = ftPredictions[i].second.c_str();
       predictions[i] = p;
   }

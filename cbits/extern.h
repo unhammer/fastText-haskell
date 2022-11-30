@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
 /*
  fasttext returns C++ std::pair's, but we need plain C structs in order to use peekArray (Storable)
 
@@ -17,7 +19,7 @@ extern "C" {
 */
 struct prediction {
   float score;                  /* fasttext::real */
-  size_t label_size;
+  uint32_t label_size;
   const char *label;
 };
 

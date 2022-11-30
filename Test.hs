@@ -13,7 +13,7 @@ main = do
       expLabel = "__label__no"
   res <- predictProbs model 2 0 input
   case res of
-    (Prediction _ l) : _ | l == expLabel -> exitWith ExitSuccess
+    (Prediction _ l) : _ | l == expLabel -> print res >> exitWith ExitSuccess
     _ -> do
       putStrLn $ "Test failed, expected " <> show expLabel <> " as top label, result, got:\n " <> show res <> " ... "
       exitWith (ExitFailure 1)
