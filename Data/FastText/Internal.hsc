@@ -21,8 +21,8 @@ import System.IO.Unsafe
 import Foreign
 import Foreign.C
 import Foreign.Marshal.Array
-import Data.ByteString (ByteString)
 import qualified Data.ByteString as S
+import Data.ByteString.Internal (memcpy, ByteString(..))
 import Control.Exception(mask_)
 
 -- | A single predicted label with probability.
@@ -37,10 +37,15 @@ instance Storable Prediction where
       str <- (#peek struct prediction, label) ptr
       lb <- S.packCStringLen (str, len)
       pure (Prediction sc lb)
-  poke ptr (Prediction sc lb) = S.useAsCStringLen lb $ \(str, len) -> do
+  poke ptr (Prediction sc lb@(PS fp 0 len)) = do
+    buf <- mallocBytes (len+1)   -- based off useAsCStringLen
+    withForeignPtr fp $ \p -> do -- but malloc instead of alloca
+      memcpy buf p len           -- so we don't free after use
+      pokeByteOff buf len (0::Word8)
+      let str = castPtr buf
       (#poke struct prediction, score     ) ptr sc
-      (#poke struct prediction, label_size) ptr str
-      (#poke struct prediction, label     ) ptr len
+      (#poke struct prediction, label_size) ptr len
+      (#poke struct prediction, label     ) ptr str
 
 -- | A fastText model loaded into memory (see 'Data.FastText.loadModel').
 data Model
