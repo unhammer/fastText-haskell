@@ -58,7 +58,8 @@ type FTReal = CFloat
 foreign import ccall unsafe "load_model" loadModel :: CString -> IO (Ptr Model)
 -- | Use a fasttext model to predict (top @k@) labels of @input@.
 -- Internal use only.
-foreign import ccall unsafe "predict_probs" predictProbs :: Ptr Model -> Int -> Float -> Ptr Prediction -> CString -> Int -> IO Int
+foreign import ccall unsafe "predict_probs" predictProbs :: Ptr Model -> Int -> Float -> Ptr Prediction -> CString -> Word32 -> IO Int
+foreign import ccall unsafe "predict_best" predictBest :: Ptr Model -> Float -> CString -> CString -> Word32 -> IO FTReal
 
 -- | Get the dimensions of a loaded fastText model.
 foreign import ccall unsafe "get_dimension" getDimension :: Ptr Model -> Int

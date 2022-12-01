@@ -1,6 +1,7 @@
 /* License: MIT */
 
 #include <cstdlib>
+#include <cstring>
 #include "extern.h"
 #include "fasttext.h"
 
@@ -21,8 +22,7 @@ struct membuf : std::streambuf
 };
 
 
-size_t predict_probs(fasttext::FastText* fasttext, int32_t k, fasttext::real threshold, prediction* predictions, char* input, size_t len) {
-  bool printProb = true;
+uint32_t predict_probs(fasttext::FastText* fasttext, int32_t k, fasttext::real threshold, prediction* predictions, char* input, uint32_t len) {
   membuf sbuf(input, input + len);
   std::istream in(&sbuf);
   std::vector<std::pair<fasttext::real, std::string>> ftPredictions;
@@ -35,6 +35,18 @@ size_t predict_probs(fasttext::FastText* fasttext, int32_t k, fasttext::real thr
       predictions[i] = p;
   }
   return ftPredictions.size();
+}
+
+fasttext::real predict_best(fasttext::FastText* fasttext, fasttext::real threshold, char* label, char* input, uint32_t len) {
+  membuf sbuf(input, input + len);
+  std::istream in(&sbuf);
+  std::vector<std::pair<fasttext::real, std::string>> ftPredictions;
+  fasttext->predictLine(in, ftPredictions, 1, threshold);
+  for(size_t i = 0; i < ftPredictions.size(); i++) {
+      memcpy(label, ftPredictions[i].second.c_str(), ftPredictions[i].second.size() + 1);
+      return ftPredictions[i].first;
+  }
+  return 0;
 }
 
 int get_dimension(fasttext::FastText* fasttext) {

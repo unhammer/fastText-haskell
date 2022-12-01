@@ -17,7 +17,7 @@ If you did preprocessing on text when training the model, remember to
 preprocess your input in the same way.
 -}
 
-module Data.FastText (Prediction(..), getDimension, Model, loadModel, predictProbs) where
+module Data.FastText (Prediction(..), getDimension, Model, loadModel, predictProbs, predictBest) where
 
 import qualified Data.ByteString as S
 import System.IO.Unsafe
@@ -28,7 +28,7 @@ import Control.Exception(mask_)
 -- import Foreign.Utilities
 
 import qualified Data.FastText.Internal as FFI
-import Data.FastText.Internal (Model, getDimension, Prediction)
+import Data.FastText.Internal (Model, getDimension, Prediction(..))
 
 -- | Load a fasttext model from file.
 loadModel :: FilePath -> IO (Ptr Model)
@@ -43,6 +43,16 @@ loadModel path = withCString path $ \cpath -> FFI.loadModel cpath
 predictProbs :: Ptr Model -> Int -> Float -> S.ByteString -> IO [Prediction]
 predictProbs model k threshold input = S.useAsCStringLen input $ \(cinput, clen) ->
     allocaArray k $ \preds -> do
-      actuallyPredicted <- FFI.predictProbs model k threshold preds cinput clen
+      actuallyPredicted <- FFI.predictProbs model k threshold preds cinput (fromIntegral clen)
       res <- peekArray k preds
       pure $ take actuallyPredicted res
+
+maxLabelLength = 256       -- 256b should be enough for everybody
+
+predictBest :: Ptr Model -> Float -> S.ByteString -> IO Prediction
+predictBest model threshold input = S.useAsCStringLen input $ \(cinput, clen) ->
+    allocaBytes maxLabelLength $ \clabel -> do
+      cscore <- FFI.predictBest model threshold clabel cinput (fromIntegral clen)
+      label <- S.packCString clabel
+      let score = realToFrac cscore
+      pure $ Prediction score label
