@@ -20,7 +20,7 @@ extern "C" {
 struct prediction {
   float score;                  /* fasttext::real */
   uint32_t label_size;
-  const char *label;
+  char *label;
 };
 
 
