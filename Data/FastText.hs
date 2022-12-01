@@ -28,7 +28,7 @@ import Control.Exception(mask_)
 -- import Foreign.Utilities
 
 import qualified Data.FastText.Internal as FFI
-import Data.FastText.Internal (Model, getDimension, Prediction)
+import Data.FastText.Internal (Model, getDimension, Prediction(..))
 
 -- | Load a fasttext model from file.
 loadModel :: FilePath -> IO (Ptr Model)
@@ -41,8 +41,9 @@ loadModel path = withCString path $ \cpath -> FFI.loadModel cpath
 -- If @threshold@ is 0.0, all @k@ predictions are included, otherwise you may get less than @k@.
 -- You may also see less than @k@ predictions if @k@ > number of labels in model.
 predictProbs :: Ptr Model -> Int -> Float -> S.ByteString -> IO [Prediction]
-predictProbs model k threshold input = S.useAsCStringLen input $ \(cinput, clen) ->
-    allocaArray k $ \preds -> do
-      actuallyPredicted <- FFI.predictProbs model k threshold preds cinput clen
+predictProbs model k threshold input = S.useAsCStringLen input $ \(cinput, clen) -> do
+    let emptyPrediction = Prediction 0 ""
+    withArray (take k $ repeat emptyPrediction) $ \preds -> do
+      actuallyPredicted <- FFI.predictProbs model k threshold preds cinput (fromIntegral clen)
       res <- peekArray k preds
       pure $ take actuallyPredicted res

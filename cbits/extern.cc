@@ -1,6 +1,7 @@
 /* License: MIT */
 
 #include <cstdlib>
+#include <cstring>
 #include "extern.h"
 #include "fasttext.h"
 
@@ -28,11 +29,9 @@ size_t predict_probs(fasttext::FastText* fasttext, int32_t k, fasttext::real thr
   std::vector<std::pair<fasttext::real, std::string>> ftPredictions;
   fasttext->predictLine(in, ftPredictions, k, threshold);
   for(size_t i = 0; i < ftPredictions.size(); i++) {
-      prediction p;
-      p.score = ftPredictions[i].first;
-      p.label_size = (uint32_t)ftPredictions[i].second.size();
-      p.label = ftPredictions[i].second.c_str();
-      predictions[i] = p;
+      predictions[i].score = ftPredictions[i].first;
+      predictions[i].label_size = (uint32_t)ftPredictions[i].second.size();
+      strcpy(predictions[i].label, ftPredictions[i].second.c_str());
   }
   return ftPredictions.size();
 }
