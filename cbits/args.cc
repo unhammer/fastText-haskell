@@ -10,6 +10,8 @@
 
 #include <stdlib.h>
 
+#include <cstdint>
+
 #include <iostream>
 #include <stdexcept>
 #include <string>
